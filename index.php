@@ -58,6 +58,53 @@ $row = $PDOX->rowDie("SELECT guess FROM {$p}tsugi_sample_module
 $oldguess = $row ? $row['guess'] : '';
 */
 
+    
+if ( isset($_POST['mail']) && isset($_POST['first']) && isset($_POST['last']) ) {
+    $email = $_POST['mail'];
+    $first = $_POST['first'];
+    $last = $_POST['last'];
+        
+    $slackInviteUrl='https://'.$subdomain .'.slack.com/api/users.admin.invite?t='.time();
+    $fields = array(
+        'email' => urlencode($email),
+        'first_name' => urlencode($first),
+        'token' => $token,
+        'set_active' => urlencode('true'),
+        '_attempts' => '1'
+    );
+    
+    // url-ify the data for the POST
+    $fields_string='';
+    foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+    rtrim($fields_string, '&');
+    
+    // open connection
+    $ch = curl_init();
+    
+    // set the url, number of POST vars, POST data
+    curl_setopt($ch,CURLOPT_URL, $slackInviteUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch,CURLOPT_POST, count($fields));
+    curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+
+    // exec
+    $replyRaw = curl_exec($ch);
+    error_log($replyRaw);
+    curl_close($ch);        
+    $reply=json_decode($replyRaw,true);
+
+    if($reply == null || (!isset($reply['ok'])) || $reply['ok']==false) {
+        $msg = "Something went wrong";
+        if ( isset($reply['error']) ) $msg .= ': '.$reply['error'];
+        $_SESSION['error'] = $msg;
+    } else {
+        $_SESSION['success'] = 'Invited successfully. Check your email. It should arrive within a couple minutes';
+    }
+    header('Location: '.addSession('index.php'));
+    return;
+    
+}
+
 // Start of the output
 $OUTPUT->header();
 ?>
@@ -83,126 +130,42 @@ if ( strlen($token) < 1 || strlen($subdomain) < 1 ) {
 }
 
 ?>
-        <div style="text-align: center; margin-top: 75px">
+        <div style="text-align: center; margin-top: 15px">
             <div>
-                <img src="slack.svg" style="width: 150px; height: 150px;" />
+                <img src="slack.svg" style="width: 100px; height: 100px;" />
             </div>
-            <h2 style="font-family: 'Roboto', sans-serif; color: #ffffff">Join <?= $subdomain ?> on Slack!</h2>
-            
-            <?php
-                $showform = false;
-                $error = false;
-                if (isset($_POST['first'])){
-                    if (strlen($_POST['first']) > 1 && strlen($_POST['last']) > 1 && strlen($_POST['mail']) > 5){
-                        sendForm();
-                    } else {
-                        $showform = true;
-                        $error = true;
-                    }
-                } else {
-                    $showform = true;
-                }
-            
-            if ($showform){
-                if ($error){
-            ?>
+            <h2 style="font-family: 'Roboto', sans-serif; color: #888888">Join 
+            <a href="https://<?= $subdomain ?>.slack.com" target="_blank"><?= $subdomain ?></a>
+            on Slack!</h2>
             
             <p style="font-family: 'Roboto', sans-serif; color: #9d3d3d">
                 Please fill in all fields
             </p>
             
-            <?php
-                    }
-                    
-                showForm();
-                }
-            ?>
-        </div>
-
-<?php
-    
-    function sendForm(){
-        $email = $_POST['mail'];
-        $first = $_POST['first'];
-        $last = $_POST['last'];
-        
-     $slackInviteUrl='https://'.$subdomain .'.slack.com/api/users.admin.invite?t='.time();
-        $fields = array(
-                'email' => urlencode($email),
-                'first_name' => urlencode($first),
-                'token' => $token,
-                'set_active' => urlencode('true'),
-                '_attempts' => '1'
-        );
-    
-        // url-ify the data for the POST
-                $fields_string='';
-                foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-                rtrim($fields_string, '&');
-    
-        // open connection
-                $ch = curl_init();
-    
-        // set the url, number of POST vars, POST data
-                curl_setopt($ch,CURLOPT_URL, $slackInviteUrl);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch,CURLOPT_POST, count($fields));
-                curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
-    
-        // exec
-                $replyRaw = curl_exec($ch);
-                $reply=json_decode($replyRaw,true);
-                if($reply['ok']==false) {
-                        echo '<p style="font-family: \'Roboto\', sans-serif; color: #9d3d3d">';
-                        echo 'Something went wrong, try again!';
-                        echo '</p>';
-                        showForm();
-                }
-                else {
-                        echo '<p style="font-family: \'Roboto\', sans-serif; color: #719E6F">';
-                        echo 'Invited successfully. Check your email. It should arrive within a couple minutes';
-                        echo '</p>';
-                }
-    
-        // close connection
-                curl_close($ch);        
-    }
-    
-    function showForm(){
-        
-        ?>
-        
             <form method="post">
-                <p style="font-family: 'Roboto', sans-serif; color: #ffffff">
+                <p style="font-family: 'Roboto', sans-serif; color: #888888">
                     First Name
                 </p>
                 
-                <input type="text" name="first" style="width: 250px; " <?php echo strlen($_POST['first']) > 0 ? 'value="'.$_POST['first'].'"' : ''; ?> />
+                <input type="text" name="first" style="width: 250px;" value="<?= $USER->firstname ?>">
                 
-                <p style="font-family: 'Roboto', sans-serif; color: #ffffff">
+                <p style="font-family: 'Roboto', sans-serif; color: #888888">
                     Last Name
                 </p>
-                <input type="text" name="last" style="width: 250px; " <?php echo strlen($_POST['last']) > 0 ? 'value="'.$_POST['last'].'"' : ''; ?> />
-                <p style="font-family: 'Roboto', sans-serif; color: #ffffff">
+                <input type="text" name="last" style="width: 250px;" value="<?= $USER->lastname ?>">
+                <p style="font-family: 'Roboto', sans-serif; color: #888888">
                     Email address
                 </p>
-                <input type="text" name="mail" style="width: 250px; " <?php echo strlen($_POST['mail']) > 0 ? 'value="'.$_POST['mail'].'"' : ''; ?> />
+                <input type="text" name="mail" style="width: 250px; " value="<?= $USER->email ?>">
                 <p>
                     <input type="submit" value="Sign me up!" />
                 </p>
             </form>
             
-        <?php       
-        
-    }
-?>
-<form method="post">
-Pick a number:
-<input type="text" name="guess" value="<?= $oldguess ?>"><br/>
-<input type="submit" name="send" value="Guess">
-</form>
-<?php
+        </div>
 
+<?php
+/*
 echo("<pre>Global Tsugi Objects:\n\n");
 var_dump($USER);
 var_dump($CONTEXT);
@@ -211,6 +174,7 @@ var_dump($LINK);
 echo("\n<hr/>\n");
 echo("Session data (low level):\n");
 echo($OUTPUT->safe_var_dump($_SESSION));
+*/
 
 $OUTPUT->footerStart();
 ?>
