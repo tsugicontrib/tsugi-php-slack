@@ -19,45 +19,6 @@ $subdomain = Settings::linkGet('subdomain', '');
 $token = Settings::linkGet('token', '');
 
 
-
-
-/*
-// Handle your POST data here...
-if ( isset($_POST['guess'])) {
-    if ( !is_numeric($_POST['guess'])) {
-        $_SESSION['error'] = "Guess must be numeric";
-        header('Location: '.addSession('index.php'));
-        return;
-    }
-
-    $PDOX->queryDie("INSERT INTO {$p}tsugi_sample_module
-        (link_id, user_id, guess, updated_at)
-        VALUES ( :LI, :UI, :GUESS, NOW() )
-        ON DUPLICATE KEY UPDATE guess=:GUESS, updated_at = NOW()",
-        array(
-            ':LI' => $LINK->id,
-            ':UI' => $USER->id,
-            ':GUESS' => $_POST["guess"]
-        )
-    );
-
-    if ( $_POST['guess'] == 42 ) {
-        $_SESSION['success'] = "Nice work";
-    } else {
-        $_SESSION['error'] = "Please try again";
-    }
-    header('Location: '.addSession('index.php'));
-    return;
-}
-
-// Retrieve the old data
-$row = $PDOX->rowDie("SELECT guess FROM {$p}tsugi_sample_module
-    WHERE user_id = :UI",
-    array(':UI' => $USER->id)
-);
-$oldguess = $row ? $row['guess'] : '';
-*/
-
     
 if ( isset($_POST['mail']) && isset($_POST['first']) && isset($_POST['last']) ) {
     $email = $_POST['mail'];
@@ -98,12 +59,32 @@ if ( isset($_POST['mail']) && isset($_POST['first']) && isset($_POST['last']) ) 
         if ( isset($reply['error']) ) $msg .= ': '.$reply['error'];
         $_SESSION['error'] = $msg;
     } else {
+        $PDOX->queryDie("INSERT INTO {$p}tsugi_slack
+            (link_id, user_id, created_at, updated_at)
+            VALUES ( :LI, :UI, NOW(), NOW() )
+            ON DUPLICATE KEY UPDATE guess=:GUESS, updated_at = NOW()",
+            array(
+                ':LI' => $LINK->id,
+                ':UI' => $USER->id
+            )
+        );
+
         $_SESSION['success'] = 'Invited successfully. Check your email. It should arrive within a couple minutes';
     }
     header('Location: '.addSession('index.php'));
     return;
     
 }
+
+// Retrieve the old data
+$row = $PDOX->rowDie("SELECT updated_at FROM {$p}tsugi_slack
+    WHERE user_id = :UI AND link_id = :LI",
+    array(
+        ':LI' => $LINK->id,
+        ':UI' => $USER->id
+    )
+);
+$invited = $row !== false;
 
 // Start of the output
 $OUTPUT->header();
@@ -134,12 +115,13 @@ if ( strlen($token) < 1 || strlen($subdomain) < 1 ) {
             <div>
                 <img src="slack.svg" style="width: 100px; height: 100px;" />
             </div>
-            <h2 style="font-family: 'Roboto', sans-serif; color: #888888">Join 
-            <a href="https://<?= $subdomain ?>.slack.com" target="_blank"><?= $subdomain ?></a>
+            <h2 style="font-family: 'Roboto', sans-serif; color: #888888">
+            <?= ($invited ? 'Launch' : 'Join') ?>
+            <a href="https://<?= $subdomain ?>.slack.com" id="toslack"><?= $subdomain ?></a>
             on Slack!</h2>
             
             <p style="font-family: 'Roboto', sans-serif; color: #9d3d3d">
-                Please fill in all fields
+                To get an invitation, please fill in all fields
             </p>
             
             <form method="post">
@@ -158,7 +140,7 @@ if ( strlen($token) < 1 || strlen($subdomain) < 1 ) {
                 </p>
                 <input type="text" name="mail" style="width: 250px; " value="<?= $USER->email ?>">
                 <p>
-                    <input type="submit" value="Sign me up!" />
+                    <input type="submit" value="<?= ( $invited ? 'Resend Invitation' : 'Send invitation!' ) ?>" />
                 </p>
             </form>
             
@@ -179,7 +161,14 @@ echo($OUTPUT->safe_var_dump($_SESSION));
 $OUTPUT->footerStart();
 ?>
 <script>
-// You might put some JavaScript here
+
+try {
+    if( window.self !== window.top ) {
+        $('#toslack').attr('target','_blank');
+    }
+} catch (e) {
+    $('#toslack').attr('target','_blank');
+}
 </script>
 <?php
 $OUTPUT->footerEnd();

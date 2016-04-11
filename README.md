@@ -49,7 +49,7 @@ if you checked this code into a "peer" folder next to `tsugi`, your
 
 You will also need to inform Tsugi to search the new tool's folder
 for files like `index.php`, `register.php`, and `database.php`.
-To do this, edite the `$CFG->tool_folders` parameter in the 
+To do this, edit the `$CFG->tool_folders` parameter in the 
 Tsugi `config.php` file to include the relative path to this tool.
 
     $CFG->tool_folders = array("admin", "mod", "samples", 
