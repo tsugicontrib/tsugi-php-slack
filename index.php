@@ -62,7 +62,7 @@ if ( isset($_POST['mail']) && isset($_POST['first']) && isset($_POST['last']) ) 
         $PDOX->queryDie("INSERT INTO {$p}tsugi_slack
             (link_id, user_id, created_at, updated_at)
             VALUES ( :LI, :UI, NOW(), NOW() )
-            ON DUPLICATE KEY UPDATE guess=:GUESS, updated_at = NOW()",
+            ON DUPLICATE KEY UPDATE updated_at = NOW()",
             array(
                 ':LI' => $LINK->id,
                 ':UI' => $USER->id
@@ -121,7 +121,7 @@ if ( strlen($token) < 1 || strlen($subdomain) < 1 ) {
             on Slack!</h2>
             
             <p style="font-family: 'Roboto', sans-serif; color: #9d3d3d">
-                To get an invitation, please fill in all fields
+                If you are already in the Slack, use the link above to launch the channel.<br/> To get an invitation, please fill in all fields below and request an invitation.
             </p>
             
             <form method="post">
