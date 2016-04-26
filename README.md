@@ -2,6 +2,8 @@
 LTI / Slack Gateway
 ===================
 
+This is a component of the [Tsugi PHP Project](https://github.com/csev/tsugi).
+
 This tool allows you to auto-invite all the students in a class into a Slack
 Channel via LTI.  This is based on the following code:
 
