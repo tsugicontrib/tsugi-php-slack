@@ -1,11 +1,9 @@
 <?php
 
-// This is set up to be installed in a peer folder to tusgi
-// This require needs to point to a properly configured tsugi
-// instance.  COpy this file to config.php and edit accordingly
-// if necessary.
+// Make this require relative to the parent of the current folder
+// http://stackoverflow.com/questions/24753758
 
-require_once "../tsugi/config.php";
+require_once dirname(__DIR__)."/tsugi/config.php";
 
 // It is possible to set this up when it is not running on the same
 // server as tsugi.   In that case, take the config-dist.php from Tsugi and
