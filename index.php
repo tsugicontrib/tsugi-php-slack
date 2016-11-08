@@ -1,5 +1,5 @@
 <?php
-require_once "config.php";
+require_once "../config.php";
 
 use \Tsugi\Core\LTIX;
 use \Tsugi\Core\Settings;
@@ -98,14 +98,14 @@ if ( $USER->instructor ) {
 $OUTPUT->flashMessages();
 if ( $USER->instructor ) {
     SettingsForm::start();
-    SettingsForm::text('subdomain',__('The name of the slack channel https://subdomain.slack.com/.'));
+    SettingsForm::text('subdomain',__('Enter the name (slackname) or your channel https://slackchan.slack.com/".'));
     SettingsForm::text('token',__('The administrative token for the above slack channel.'));
     SettingsForm::done();
     SettingsForm::end();
 }
 
 if ( strlen($token) < 1 || strlen($subdomain) < 1 ) {
-    echo('<br clear="all"><p>This channel is not yet configured</p>'."\n");
+    echo('<br clear="all"><p>This Slack channel is not yet configured.</p>'."\n");
     $OUTPUT->footer();
     return;
 }
