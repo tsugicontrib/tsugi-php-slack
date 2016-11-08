@@ -15,7 +15,7 @@ Channel via LTI.  This is based on the following code:
 Setup Notes
 -----------
 
-Make a slack channel a get a token here:
+Create a slack channel and get a token here:
 
     https://api.slack.com/docs/oauth-test-tokens
 
