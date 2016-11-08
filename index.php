@@ -98,6 +98,12 @@ if ( $USER->instructor ) {
 $OUTPUT->flashMessages();
 if ( $USER->instructor ) {
     SettingsForm::start();
+    echo("<p>Make a slack channel a get a token here:</p>\n");
+    echo('<p><a href="https://api.slack.com/docs/oauth-test-tokens" target="_blank">https://api.slack.com/docs/oauth-test-tokens</a></p>'."\n");
+    echo("<p>A token looks like this:</p>\n");
+    echo("<p>xoxp-38475772738-44897347937-84398938794-2832f83888</p>\n");
+
+    echo("<p>Make sure the token is created for the owner of the slack channel.</p>\n");
     SettingsForm::text('subdomain',__('Enter the name (slackname) or your channel https://slackchan.slack.com/".'));
     SettingsForm::text('token',__('The administrative token for the above slack channel.'));
     SettingsForm::done();

@@ -28,29 +28,15 @@ Make sure the token is created for the owner of the slack channel.
 Simple Installation
 -------------------
 
-In the simple installation scenario, you have installed and configured 
-Tsugi to a folder like:
+This expects to be checked into a folder that contains one or more
+Tsugi modules like:
 
-    htdocs/tsugi
+    htdocs/py4e/mod
 
-Since Tsugi can be configured to discover PHP tools in lots of folders, you
-could check this code out into one of several places:
+This code expects there to be a `config.php` in the parent folder.
 
-    htdocs/tsugi/mod/tsugi-php-slack
-    htdocs/tsugi/tsugi-php-slack
-    htdocs/tsugi-php-slack  (suggested)
-    htdocs/php-intro/tools/tsugi-php-slack
-
-Once you have checked this code out, you need to make a config.php that
-simply includes the `config.php` from the Tsugi directory.   For example
-if you checked this code into a "peer" folder next to `tsugi`, your
-`config.php` in this folder should be:
-
-    <?php 
-    require_once "../tsugi/config.php";
-
-You will also need to inform Tsugi to search the new tool's folder
-for files like `index.php`, `register.php`, and `database.php`.
+You will also need to inform Tsugi to search the new tool's parent 
+folder for files like `index.php`, `register.php`, and `database.php`.
 To do this, edit the `$CFG->tool_folders` parameter in the 
 Tsugi `config.php` file to include the relative path to this tool.
 
@@ -58,8 +44,8 @@ Tsugi `config.php` file to include the relative path to this tool.
         "exercises", "../tsugi-php-slack");
 
 If you checked the tool out into the `mod` folder with Tsugi - you may
-not need to change this configuration value as `mod` is already searched 
-to find tools.
+not need to change this configuration value as `mod` and its chid folders
+are already searched to find tools.
 
 Running The Application
 -----------------------
@@ -72,7 +58,7 @@ support for the controlling Tsugi will know about this tool.
 
 LTI 1.x launches simply are directed to the index.php in this folder:
 
-    http://localhost:8888/tsugi-php-slack/index.php
+    http://localhost:8888/py4e/mod/tsugi-php-slack/index.php
     key: 12345
     secret: secret
 
